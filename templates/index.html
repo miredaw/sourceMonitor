@@ -1,0 +1,715 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mireda Source Server Monitor</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --dark-color: #2d3436;
+            --light-color: #dfe6e9;
+            --online-color: #00b894;
+            --offline-color: #d63031;
+            --background-color: #f8f9fa;
+            --card-bg-color: #fff;
+            --text-color: #333;
+            --text-muted: #6c757d;
+            --border-color: rgba(0,0,0,0.05);
+            --header-bg: #fff;
+        }
+        
+        [data-theme="dark"] {
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --dark-color: #f5f6fa;
+            --light-color: #2d3436;
+            --background-color: #121212;
+            --card-bg-color: #1e1e1e;
+            --text-color: #f5f6fa;
+            --text-muted: #a5a6ab;
+            --border-color: rgba(255,255,255,0.05);
+            --header-bg: #0f0f0f;
+        }
+        
+        body {
+            background-color: var(--background-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+        }
+        
+        .card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            background-color: var(--card-bg-color);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+        }
+        
+        .server-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0;
+            color: var(--text-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .server-address {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 50px;
+        }
+        
+        .status-online {
+            background-color: var(--online-color);
+            color: white;
+        }
+        
+        .status-offline {
+            background-color: var(--offline-color);
+            color: white;
+        }
+        
+        .player-count {
+            font-size: 0.9rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 50px;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+        
+        .refresh-btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .remove-btn {
+            background-color: transparent;
+            color: #d63031;
+            border: none;
+            font-size: 0.9rem;
+        }
+        
+        .server-details {
+            padding: 15px;
+        }
+        
+        .detail-item {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .player-table {
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+        
+        .player-table th {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .player-name {
+            font-weight: 500;
+        }
+        
+        .player-score {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .time-info {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        
+        .add-server-card {
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            background-color: var(--card-bg-color);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .add-server-card:hover {
+            border-color: var(--primary-color);
+            background-color: var(--background-color);
+        }
+        
+        .add-server-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .nav-tabs .nav-link {
+            color: var(--text-color);
+            font-weight: 500;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 600;
+            background-color: var(--card-bg-color);
+            border-color: var(--border-color) var(--border-color) var(--card-bg-color);
+        }
+        
+        .nav-tabs {
+            border-color: var(--border-color);
+        }
+        
+        .btn-light {
+            background-color: var(--card-bg-color);
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+        
+        .btn-light:hover {
+            background-color: var(--background-color);
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+        
+        .dropdown-menu {
+            background-color: var(--card-bg-color);
+            border-color: var(--border-color);
+        }
+        
+        .dropdown-item {
+            color: var(--text-color);
+        }
+        
+        .dropdown-item:hover {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        
+        /* Animation for updates */
+        @keyframes highlight {
+            0% { background-color: rgba(108, 92, 231, 0.2); }
+            100% { background-color: transparent; }
+        }
+        
+        .highlight {
+            animation: highlight 2s;
+        }
+        
+        .rules-list {
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+        }
+        
+        .rules-list .list-group-item {
+            padding: 0.5rem 0.75rem;
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+        
+        .navbar {
+            background-color: var(--header-bg) !important;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .navbar-light .navbar-brand {
+            color: var(--text-color) !important;
+        }
+        
+        .table {
+            color: var(--text-color);
+        }
+        
+        .bg-light {
+            background-color: var(--background-color) !important;
+        }
+        
+        .badge.bg-light {
+            color: var(--text-color) !important;
+        }
+        
+        .badge.bg-secondary {
+            background-color: var(--secondary-color) !important;
+        }
+        
+        .card-footer {
+            background-color: var(--card-bg-color) !important;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .modal-content {
+            background-color: var(--card-bg-color);
+            color: var(--text-color);
+        }
+        
+        .modal-header, .modal-footer {
+            border-color: var(--border-color);
+        }
+        
+        .form-control {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+        
+        .form-control:focus {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        
+        .form-label {
+            color: var(--text-color);
+        }
+        
+        /* Dark mode toggle */
+        .dark-mode-toggle {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 50px;
+            background-color: transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .dark-mode-toggle:hover {
+            background-color: var(--background-color);
+        }
+        
+        .dark-mode-toggle i {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+            color: var(--text-color);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .card-header {
+                padding: 0.75rem;
+            }
+            
+            .server-details {
+                padding: 10px;
+            }
+            
+            .server-name {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-gamepad me-2"></i>Mireda Monitor
+            </a>
+            <div class="ms-auto">
+                <div class="dark-mode-toggle" id="darkModeToggle">
+                    <i class="fas fa-moon"></i>
+                    <span>Dark Mode</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="container my-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-server me-2"></i>Monitored Servers</h4>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addServerModal">
+                        <i class="fas fa-plus me-1"></i> Add Server
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            {% if servers %}
+                {% for server_id, server in servers.items() %}
+                <div class="col-md-6 col-lg-4 server-card" id="server-{{ server_id }}">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center py-3">
+                            <div>
+                                <h5 class="server-name">{{ server.name }}</h5>
+                                <div class="server-address">{{ server.address }}:{{ server.port }}</div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                {% if server.data and server.data.status == 'online' %}
+                                    <span class="status-badge status-online me-2">
+                                        <i class="fas fa-circle me-1"></i>Online
+                                    </span>
+                                {% else %}
+                                    <span class="status-badge status-offline me-2">
+                                        <i class="fas fa-circle me-1"></i>Offline
+                                    </span>
+                                {% endif %}
+                                
+                                <button class="btn btn-sm btn-light refresh-btn" onclick="refreshServer('{{ server_id }}')">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                
+                                <div class="dropdown ms-1">
+                                    <button class="btn btn-sm btn-light refresh-btn" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <form action="/remove_server/{{ server_id }}" method="post" onsubmit="return confirm('Are you sure you want to remove this server?')">
+                                                <button type="submit" class="dropdown-item text-danger">
+                                                    <i class="fas fa-trash me-1"></i> Remove
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body p-0">
+                            {% if server.data and server.data.status == 'online' and server.data.info %}
+                                <div class="d-flex bg-light p-2 border-bottom">
+                                    <div class="me-3">
+                                        <span class="player-count">
+                                            <i class="fas fa-users me-1"></i> 
+                                            {{ server.data.info.player_count }}/{{ server.data.info.max_players }}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-map me-1"></i> {{ server.data.info.map }}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Tabs navigation -->
+                                <ul class="nav nav-tabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#players-{{ server_id }}" type="button" role="tab">
+                                            Players
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#details-{{ server_id }}" type="button" role="tab">
+                                            Details
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#rules-{{ server_id }}" type="button" role="tab">
+                                            Rules
+                                        </button>
+                                    </li>
+                                </ul>
+                                
+                                <!-- Tab content -->
+                                <div class="tab-content p-3">
+                                    <!-- Players tab -->
+                                    <div class="tab-pane fade show active" id="players-{{ server_id }}" role="tabpanel">
+                                        {% if server.data.players and server.data.players|length > 0 %}
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-hover player-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col">Player</th>
+                                                            <th scope="col">Score</th>
+                                                            <th scope="col">Time</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for player in server.data.players %}
+                                                        <tr>
+                                                            <td class="player-name">{{ player.name }}</td>
+                                                            <td class="player-score">{{ player.score }}</td>
+                                                            <td>
+                                                                {% if player.duration is defined and player.duration is not none %}
+                                                                    {% if player.duration > 3600 %}
+                                                                        {{ '%0.1f'|format(player.duration / 3600) }} hrs
+                                                                    {% elif player.duration > 60 %}
+                                                                        {{ '%0.1f'|format(player.duration / 60) }} min
+                                                                    {% else %}
+                                                                        {{ '%0.0f'|format(player.duration) }} sec
+                                                                    {% endif %}
+                                                                {% else %}
+                                                                    -
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        {% else %}
+                                            <div class="text-center py-4">
+                                                <i class="fas fa-user-slash text-muted mb-2" style="font-size: 2rem;"></i>
+                                                <p class="text-muted">No players online</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Details tab -->
+                                    <div class="tab-pane fade" id="details-{{ server_id }}" role="tabpanel">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Name:</span>
+                                                    <span>{{ server.data.info.name if server.data.info.name is defined else 'Unknown' }}</span>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Game:</span>
+                                                    <span>{{ server.data.info.game if server.data.info.game is defined else 'Unknown' }}</span>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Version:</span>
+                                                    <span>{{ server.data.info.version if server.data.info.version is defined else 'Unknown' }}</span>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <span class="detail-label">VAC:</span>
+                                                    <span>{{ 'Enabled' if server.data.info.vac_enabled is defined and server.data.info.vac_enabled else 'Disabled' }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="detail-item">
+                                                    <span class="detail-label">OS:</span>
+                                                    <span>{{ server.data.info.os if server.data.info.os is defined else 'Unknown' }}</span>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Server Type:</span>
+                                                    <span>{{ server.data.info.server_type if server.data.info.server_type is defined else 'Unknown' }}</span>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <span class="detail-label">Ping:</span>
+                                                    <span>{{ server.data.info.ping if server.data.info.ping is defined else '-' }} ms</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Rules tab -->
+                                    <div class="tab-pane fade" id="rules-{{ server_id }}" role="tabpanel">
+                                        {% if server.data.rules and server.data.rules|length > 0 %}
+                                            <ul class="list-group rules-list">
+                                                {% for key, value in server.data.rules.items() %}
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <span class="detail-label">{{ key }}</span>
+                                                    <span class="badge bg-light text-dark">{{ value }}</span>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% else %}
+                                            <div class="text-center py-3">
+                                                <p class="text-muted">No rules available</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                            {% else %}
+                                <div class="server-details p-3">
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-exclamation-triangle text-warning mb-2" style="font-size: 2rem;"></i>
+                                        <p class="text-muted">
+                                            {% if server.data and server.data.error %}
+                                                {{ server.data.error }}
+                                            {% else %}
+                                                Unable to connect to server
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="card-footer bg-white text-center">
+                                <small class="time-info">
+                                    <i class="far fa-clock me-1"></i>
+                                    Last updated: {{ server.data.last_updated if server.data and server.data.last_updated else 'Never' }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="fas fa-server text-muted mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="text-muted">No servers added yet</h5>
+                        <p class="text-muted">Click the "Add Server" button to start monitoring</p>
+                        <button class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#addServerModal">
+                            <i class="fas fa-plus me-1"></i> Add Server
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Add Server Modal -->
+    <div class="modal fade" id="addServerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Server</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/add_server" method="post">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="serverName" class="form-label">Friendly Name</label>
+                            <input type="text" class="form-control" id="serverName" name="name" placeholder="My CS:GO Server" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="serverAddress" class="form-label">Server Address</label>
+                            <input type="text" class="form-control" id="serverAddress" name="address" placeholder="example.com or IP address" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="serverPort" class="form-label">Server Port</label>
+                            <input type="number" class="form-control" id="serverPort" name="port" placeholder="27015" value="27015" min="1" max="65535" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Server</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    
+    <script>
+        // Dark mode functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const toggleIcon = darkModeToggle.querySelector('i');
+            const toggleText = darkModeToggle.querySelector('span');
+            
+            // Check for saved theme preference or use the system preference
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            // Set initial theme based on saved preference or system preference
+            if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                toggleIcon.classList.remove('fa-moon');
+                toggleIcon.classList.add('fa-sun');
+                toggleText.textContent = 'Light Mode';
+            }
+            
+            // Toggle theme when button is clicked
+            darkModeToggle.addEventListener('click', function() {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                
+                if (currentTheme === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                    toggleIcon.classList.remove('fa-sun');
+                    toggleIcon.classList.add('fa-moon');
+                    toggleText.textContent = 'Dark Mode';
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    toggleIcon.classList.remove('fa-moon');
+                    toggleIcon.classList.add('fa-sun');
+                    toggleText.textContent = 'Light Mode';
+                }
+            });
+        });
+        
+        // Establish Socket.IO connection
+        const socket = io();
+        
+        // Listen for server updates
+        socket.on('server_update', function(data) {
+            const serverId = data.id;
+            const serverData = data.data;
+            const serverCard = document.getElementById(`server-${serverId}`);
+            
+            if (serverCard) {
+                // Reload the page to show updated data
+                // In a production app, you would update just the necessary DOM elements
+                location.reload();
+                
+                // Add a highlighting effect
+                serverCard.classList.add('highlight');
+                setTimeout(() => {
+                    serverCard.classList.remove('highlight');
+                }, 2000);
+            }
+        });
+        
+        // Function to manually refresh a server
+        function refreshServer(serverId) {
+            const refreshBtn = document.querySelector(`#server-${serverId} .refresh-btn`);
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            refreshBtn.disabled = true;
+            
+            fetch(`/refresh_server/${serverId}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // The socket.io event will handle the update
+                } else {
+                    alert('Failed to refresh server: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to refresh server');
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+                    refreshBtn.disabled = false;
+                }, 1000);
+            });
+        }
+    </script>
+</body>
+</html>
